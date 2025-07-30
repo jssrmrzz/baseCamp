@@ -6,8 +6,8 @@ oooo                                              oooooooo8
  888    888 888    888          888 888         888o     oo 888    888   888 888 888  888    888 
 o888ooo88    88ooo88 8o 88oooooo88    88oooo888  888oooo88   88ooo88 8o o888o888o888o 888ooo88   
                                                                                      o888        
-
-# baseCamp
+</pre>
+ # baseCamp
 
 AI-powered intake and CRM enrichment service for small businesses. Automatically captures, analyzes, 
 and organizes client inquiries using local LLM processing.
@@ -163,9 +163,9 @@ docker-compose down
 
 ## License
 
-[Add your license here]
+[Addlicense here]
 
 ## Support
 
-For questions or issues, please open a GitHub issue or contact [your-email@example.com].
-</pre>
+For questions or issues, please open a GitHub issue or contact [blank@example.com].
+
