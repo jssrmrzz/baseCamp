@@ -1,0 +1,109 @@
+version: '3.8'
+
+services:
+  # Ollama LLM service
+  ollama:
+    image: ollama/ollama:latest
+    container_name: basecamp-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_ORIGINS=http://localhost:8000,http://api:8000
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # FastAPI application
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: basecamp-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/app/chroma_db
+      - logs_data:/app/logs
+    environment:
+      # API Configuration
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - DEBUG=false
+      
+      # LLM Configuration
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - OLLAMA_MODEL=mistral:latest
+      - OLLAMA_TIMEOUT=30
+      
+      # Vector Database
+      - CHROMA_PERSIST_DIRECTORY=/app/chroma_db
+      - CHROMA_COLLECTION_NAME=leads
+      
+      # Lead Processing
+      - LEAD_SIMILARITY_THRESHOLD=0.85
+      - MAX_SIMILAR_LEADS=5
+      - BUSINESS_TYPE=general
+      
+      # Rate Limiting
+      - RATE_LIMIT_REQUESTS_PER_MINUTE=60
+      - RATE_LIMIT_REQUESTS_PER_HOUR=1000
+      
+      # Logging
+      - LOG_LEVEL=INFO
+      - LOG_FORMAT=json
+      
+      # Security
+      - CORS_ORIGINS=["http://localhost:3000"]
+      - ALLOWED_HOSTS=["localhost", "127.0.0.1"]
+      
+      # Background Processing
+      - ENABLE_BACKGROUND_TASKS=true
+      - BACKGROUND_TASK_TIMEOUT=300
+    env_file:
+      - .env
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Optional: Redis for caching (future enhancement)
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: basecamp-redis
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis_data:/data
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+
+volumes:
+  ollama_data:
+    driver: local
+  chroma_data:
+    driver: local
+  logs_data:
+    driver: local
+  # redis_data:
+  #   driver: local
+
+networks:
+  default:
+    name: basecamp-network
