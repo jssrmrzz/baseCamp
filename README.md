@@ -9,7 +9,8 @@ o888ooo88    88ooo88 8o 88oooooo88    88oooo888  888oooo88   88ooo88 8o o888o888
 
 # baseCamp
 
-AI-powered intake and CRM enrichment service for small businesses. Automatically captures, analyzes, and organizes client inquiries using local LLM processing.
+AI-powered intake and CRM enrichment service for small businesses. Automatically captures, analyzes, 
+and organizes client inquiries using local LLM processing.
 
 ## Overview
 
@@ -19,7 +20,8 @@ baseCamp transforms raw client inquiries into structured, actionable leads by:
 - Detecting duplicate leads through semantic similarity
 - Syncing enriched data to Airtable CRM
 
-Perfect for mechanics, med spas, consultants, and other service businesses looking to streamline their lead management.
+Perfect for mechanics, med spas, consultants, and other service businesses looking to 
+ streamline their lead management.
 
 ## Features
 
