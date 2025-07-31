@@ -13,6 +13,7 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
 from src.config.settings import settings
+from src.api import intake, leads
 
 
 # Configure logging
@@ -79,6 +80,10 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
 )
+
+# Include API routers
+app.include_router(intake.router)
+app.include_router(leads.router)
 
 
 @app.get("/", include_in_schema=False)
