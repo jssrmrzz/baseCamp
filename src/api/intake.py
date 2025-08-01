@@ -492,14 +492,5 @@ async def intake_health_check(
         )
 
 
-# Add rate limit exception handler
-@router.exception_handler(RateLimitExceeded)
-async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
-    """Handle rate limit exceeded exceptions."""
-    return JSONResponse(
-        status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-        content=IntakeResponse.error(
-            "Rate limit exceeded. Please try again later.",
-            {"retry_after": exc.retry_after}
-        )
-    )
+# Note: Rate limit exception handling should be added to the main app
+# in src/main.py if needed
