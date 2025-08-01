@@ -10,7 +10,7 @@ from uuid import UUID
 import httpx
 from pyairtable import Api, Base, Table
 from pyairtable.api.types import CreateRecordDict, UpdateRecordDict
-from pyairtable.exceptions import AirtableApiError
+from pyairtable.exceptions import PyAirtableError
 
 from ..config.settings import settings
 from ..models.airtable import (
@@ -194,7 +194,7 @@ class AirtableService(CRMServiceInterface):
             
             return sync_record
             
-        except AirtableApiError as e:
+        except PyAirtableError as e:
             if "RATE_LIMITED" in str(e):
                 raise AirtableRateLimitError(f"Rate limit exceeded: {str(e)}")
             else:
@@ -241,7 +241,7 @@ class AirtableService(CRMServiceInterface):
             
             return sync_record
             
-        except AirtableApiError as e:
+        except PyAirtableError as e:
             if "RATE_LIMITED" in str(e):
                 raise AirtableRateLimitError(f"Rate limit exceeded: {str(e)}")
             elif "NOT_FOUND" in str(e):
@@ -350,7 +350,7 @@ class AirtableService(CRMServiceInterface):
                     created_records = self.table.batch_create(creates)
                     for record, operation in zip(created_records, create_ops):
                         operation.mark_success(record["id"])
-                except AirtableApiError as e:
+                except PyAirtableError as e:
                     error_msg = f"Batch create failed: {str(e)}"
                     for operation in create_ops:
                         operation.mark_failed(error_msg)
@@ -361,7 +361,7 @@ class AirtableService(CRMServiceInterface):
                     updated_records = self.table.batch_update(updates)
                     for record, operation in zip(updated_records, update_ops):
                         operation.mark_success(record["id"])
-                except AirtableApiError as e:
+                except PyAirtableError as e:
                     error_msg = f"Batch update failed: {str(e)}"
                     for operation in update_ops:
                         operation.mark_failed(error_msg)

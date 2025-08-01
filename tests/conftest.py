@@ -16,8 +16,9 @@ os.environ["ENABLE_API_DOCS"] = "true"
 os.environ["OLLAMA_BASE_URL"] = "http://localhost:11434"
 os.environ["OLLAMA_MODEL"] = "mistral:latest"
 os.environ["CHROMA_PERSIST_DIRECTORY"] = "./test_chroma_db"
-os.environ["AIRTABLE_API_KEY"] = "test_key"
-os.environ["AIRTABLE_BASE_ID"] = "test_base_id"
+# Disable Airtable integration for tests (no API key provided)
+os.environ["AIRTABLE_API_KEY"] = ""
+os.environ["AIRTABLE_BASE_ID"] = ""
 os.environ["AIRTABLE_TABLE_NAME"] = "TestLeads"
 
 from src.main import app
