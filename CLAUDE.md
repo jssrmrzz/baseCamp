@@ -27,7 +27,7 @@ baseCamp is an AI-powered intake and CRM enrichment service designed for small b
 
 ## Project Structure
 
-**Status**: ✅ Phase 2 Complete - Core Logic & API Implementation
+**Status**: ✅ Sub-Task 1 Complete - Service Integration & Testing Infrastructure
 
 ```
 basecamp/
@@ -99,7 +99,7 @@ DEBUG=false
 
 ## Implemented API Endpoints
 
-**Status**: ✅ Complete API surface - ready for service integration
+**Status**: ✅ Complete API surface with full service integration
 
 ### Lead Intake API (`/api/v1/intake`)
 - `POST /api/v1/intake` - Main lead processing with full AI pipeline
@@ -149,7 +149,7 @@ DEBUG=false
 
 ## Development Commands
 
-**Status**: ✅ Complete development workflow with testing
+**Status**: ✅ Complete development workflow with comprehensive service integration
 
 ```bash
 # Project setup
@@ -195,11 +195,11 @@ docker-compose down             # Stop all services
 ### Service-Oriented Architecture
 The system follows a layered architecture with clear service boundaries:
 
-1. **API Layer** (`src/api/`): FastAPI routers handling HTTP requests
-2. **Service Layer** (`src/services/`): Business logic encapsulation
-   - `LLMService`: Ollama integration for lead analysis
-   - `VectorService`: ChromaDB for semantic similarity
-   - `CRMService`: Airtable synchronization
+1. **API Layer** (`src/api/`): FastAPI routers with dependency injection and service integration
+2. **Service Layer** (`src/services/`): Complete business logic implementation
+   - `LLMService`: ✅ Ollama integration with async HTTP client and error handling
+   - `VectorService`: ✅ ChromaDB for semantic similarity with batch operations
+   - `CRMService`: ✅ Airtable synchronization with rate limiting and retry logic
 3. **Data Layer**: ChromaDB (vectors) + Airtable (structured data)
 4. **External Dependencies**: Ollama (local LLM), Airtable API
 
@@ -209,11 +209,11 @@ Input → Validation → Raw Storage → Embedding Generation →
 Similarity Check → LLM Analysis → Lead Enrichment → CRM Sync → Response
 ```
 
-Key processing decisions:
-- **Async Processing**: Use FastAPI BackgroundTasks for non-blocking LLM operations
-- **Graceful Degradation**: Continue processing even if LLM/vector services fail
-- **Duplicate Detection**: Semantic similarity search before expensive LLM analysis
-- **Error Handling**: Circuit breaker pattern for external service failures
+Key processing decisions implemented:
+- **Async Processing**: ✅ FastAPI BackgroundTasks with service dependency injection
+- **Graceful Degradation**: ✅ Comprehensive error handling and fallback mechanisms
+- **Duplicate Detection**: ✅ Vector similarity search with configurable thresholds
+- **Error Handling**: ✅ Rate limiting, retry logic, and robust service interfaces
 
 ### Data Models Hierarchy
 - `LeadInput` (raw form data) → `EnrichedLead` (with AI analysis) → `AirtableRecord` (CRM format)
