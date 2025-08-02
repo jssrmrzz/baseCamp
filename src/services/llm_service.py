@@ -106,7 +106,7 @@ class OllamaService(LLMServiceInterface):
                 system_prompt="""You are an AI assistant specialized in analyzing customer inquiries for small businesses. 
 Your task is to analyze the lead content and extract key information in a structured format.
 
-Respond ONLY with valid JSON in this exact format:
+Respond ONLY with valid JSON in this exact format (use empty arrays [] if no data, never null):
 {{
     "intent": "inquiry|appointment_request|quote_request|support|complaint|general",
     "intent_confidence": 0.85,
@@ -144,7 +144,7 @@ Focus on automotive-specific entities like:
 - Symptoms or issues described
 - Urgency indicators (car won't start, safety issues, etc.)
 
-Respond ONLY with valid JSON in this exact format:
+Respond ONLY with valid JSON in this exact format (use empty arrays [] if no data, never null):
 {{
     "intent": "inquiry|appointment_request|quote_request|support|complaint|general",
     "intent_confidence": 0.85,
@@ -186,7 +186,7 @@ Focus on medspa-specific entities like:
 - Consultation requests
 - Special events or timing needs
 
-Respond ONLY with valid JSON in this exact format:
+Respond ONLY with valid JSON in this exact format (use empty arrays [] if no data, never null):
 {{
     "intent": "inquiry|appointment_request|quote_request|support|complaint|general",
     "intent_confidence": 0.85,
@@ -228,7 +228,7 @@ Focus on consulting-specific entities like:
 - Budget indicators
 - Current challenges or pain points
 
-Respond ONLY with valid JSON in this exact format:
+Respond ONLY with valid JSON in this exact format (use empty arrays [] if no data, never null):
 {{
     "intent": "inquiry|appointment_request|quote_request|support|complaint|general",
     "intent_confidence": 0.85,
