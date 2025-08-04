@@ -1,7 +1,7 @@
 """Configuration settings for baseCamp application."""
 
 from typing import List, Literal, Optional
-from pydantic import Field, validator
+from pydantic import Field, validator, model_validator
 from pydantic_settings import BaseSettings
 import os
 
@@ -104,12 +104,12 @@ class Settings(BaseSettings):
             raise ValueError("similarity_threshold must be between 0.0 and 1.0")
         return v
 
-    @validator("airtable_api_key")
-    def validate_airtable_config(cls, v, values):
+    @model_validator(mode='after')
+    def validate_airtable_config(self):
         """Validate Airtable configuration if provided."""
-        if v and not values.get("airtable_base_id"):
+        if self.airtable_api_key and not self.airtable_base_id:
             raise ValueError("airtable_base_id is required when airtable_api_key is provided")
-        return v
+        return self
 
     @property
     def is_development(self) -> bool:

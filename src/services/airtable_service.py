@@ -415,9 +415,9 @@ class AirtableService(CRMServiceInterface):
             await self._rate_limit()
             
             # Try to get table schema
-            table_info = self.table.schema()
+            table_schema = self.table.schema()
             
-            if table_info and "fields" in table_info:
+            if table_schema and hasattr(table_schema, 'fields') and table_schema.fields:
                 self.logger.info("Airtable health check passed")
                 return True
             else:
