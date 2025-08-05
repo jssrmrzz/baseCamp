@@ -503,7 +503,7 @@ def create_crm_service(config: Optional[AirtableConfig] = None) -> CRMServiceInt
 _crm_service: Optional[CRMServiceInterface] = None
 
 
-async def get_crm_service() -> CRMServiceInterface:
+def get_crm_service() -> CRMServiceInterface:
     """Get or create CRM service instance."""
     global _crm_service
     if _crm_service is None:

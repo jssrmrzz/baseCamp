@@ -474,7 +474,7 @@ def create_llm_service() -> LLMServiceInterface:
 _llm_service: Optional[LLMServiceInterface] = None
 
 
-async def get_llm_service() -> LLMServiceInterface:
+def get_llm_service() -> LLMServiceInterface:
     """Get or create LLM service instance."""
     global _llm_service
     if _llm_service is None:
