@@ -187,6 +187,33 @@ class ChromaVectorService(VectorServiceInterface):
         
         return " | ".join(text_parts)
     
+    def _is_same_contact(self, lead: LeadInput, stored_metadata: Dict) -> bool:
+        """
+        Check if the lead has the same contact information as a stored lead.
+        
+        This helps prevent false positives when different people have similar
+        service requests (e.g., two customers wanting oil changes).
+        """
+        # Check email match (most reliable identifier)
+        if lead.contact.email and stored_metadata.get("contact_email"):
+            return str(lead.contact.email).lower() == stored_metadata["contact_email"].lower()
+        
+        # Check phone match (normalize phone numbers)
+        if lead.contact.phone and stored_metadata.get("contact_phone"):
+            # Simple phone normalization - remove all non-digits
+            lead_phone = "".join(c for c in lead.contact.phone if c.isdigit())
+            stored_phone = "".join(c for c in stored_metadata["contact_phone"] if c.isdigit())
+            if len(lead_phone) >= 10 and len(stored_phone) >= 10:
+                # Compare last 10 digits (handles country codes)
+                return lead_phone[-10:] == stored_phone[-10:]
+        
+        # Check exact name match (less reliable but better than nothing)
+        if lead.contact.full_name and stored_metadata.get("contact_name"):
+            return lead.contact.full_name.lower().strip() == stored_metadata["contact_name"].lower().strip()
+        
+        # No reliable contact information to compare
+        return False
+    
     async def add_lead(self, lead: EnrichedLead) -> VectorData:
         """Add lead to vector database with embedding."""
         try:
@@ -212,6 +239,8 @@ class ChromaVectorService(VectorServiceInterface):
                 metadata["contact_name"] = lead.contact.full_name
             if lead.contact.email:
                 metadata["contact_email"] = str(lead.contact.email)
+            if lead.contact.phone:
+                metadata["contact_phone"] = lead.contact.phone
             if lead.contact.company:
                 metadata["company"] = lead.contact.company
             
@@ -267,7 +296,7 @@ class ChromaVectorService(VectorServiceInterface):
                 include=["distances", "metadatas", "documents"]
             )
             
-            # Process results
+            # Process results with contact-based exclusion
             similar_leads = []
             if results["ids"] and results["ids"][0]:  # Check if results exist
                 for i, (lead_id, distance, metadata) in enumerate(
@@ -276,15 +305,22 @@ class ChromaVectorService(VectorServiceInterface):
                     # Convert distance to similarity score (0-1, higher is more similar)
                     similarity_score = 1.0 - distance
                     
-                    # Filter by threshold
-                    if similarity_score >= threshold:
-                        similar_leads.append(
-                            SimilarityResult(
-                                lead_id=UUID(lead_id),
-                                similarity_score=similarity_score,
-                                metadata=metadata
-                            )
+                    # Skip if below threshold
+                    if similarity_score < threshold:
+                        continue
+                    
+                    # Contact-based exclusion: Skip if same contact information
+                    if self._is_same_contact(lead, metadata):
+                        self.logger.debug(f"Skipping lead {lead_id} - same contact information")
+                        continue
+                    
+                    similar_leads.append(
+                        SimilarityResult(
+                            lead_id=UUID(lead_id),
+                            similarity_score=similarity_score,
+                            metadata=metadata
                         )
+                    )
             
             # Sort by similarity score descending
             similar_leads.sort(key=lambda x: x.similarity_score, reverse=True)
