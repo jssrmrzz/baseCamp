@@ -427,7 +427,7 @@ def create_vector_service() -> VectorServiceInterface:
 _vector_service: Optional[VectorServiceInterface] = None
 
 
-async def get_vector_service() -> VectorServiceInterface:
+def get_vector_service() -> VectorServiceInterface:
     """Get or create vector service instance."""
     global _vector_service
     if _vector_service is None:

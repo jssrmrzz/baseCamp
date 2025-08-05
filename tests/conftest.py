@@ -47,10 +47,24 @@ def event_loop():
 
 
 @pytest.fixture
-def client() -> Generator[TestClient, None, None]:
+def client(mock_services) -> Generator[TestClient, None, None]:
     """Create a test client for the FastAPI application."""
-    with TestClient(app) as test_client:
-        yield test_client
+    # Import services here to avoid circular imports
+    from src.services.llm_service import get_llm_service
+    from src.services.vector_service import get_vector_service
+    from src.services.airtable_service import get_crm_service
+    
+    # Override dependencies with mock services
+    app.dependency_overrides[get_llm_service] = lambda: mock_services["llm"]
+    app.dependency_overrides[get_vector_service] = lambda: mock_services["vector"]
+    app.dependency_overrides[get_crm_service] = lambda: mock_services["crm"]
+    
+    try:
+        with TestClient(app) as test_client:
+            yield test_client
+    finally:
+        # Clean up dependency overrides
+        app.dependency_overrides.clear()
 
 
 @pytest.fixture
