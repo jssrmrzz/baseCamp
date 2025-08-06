@@ -5,7 +5,7 @@ import sys
 from contextlib import asynccontextmanager
 from typing import Dict, Any
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -77,7 +77,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -98,7 +98,7 @@ async def root() -> Dict[str, Any]:
 
 @app.get("/api/v1/health")
 @limiter.limit(f"{settings.rate_limit_requests_per_minute}/minute")
-async def health_check(request) -> Dict[str, Any]:
+async def health_check(request: Request) -> Dict[str, Any]:
     """Health check endpoint for monitoring service status."""
     logger = logging.getLogger(__name__)
     
