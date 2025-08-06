@@ -27,6 +27,8 @@ limiter = Limiter(key_func=get_remote_address)
 logger = logging.getLogger(__name__)
 
 
+
+
 class IntakeResponse:
     """Response models for intake endpoints."""
     
@@ -251,6 +253,8 @@ async def submit_lead(
         )
 
 
+
+
 @router.post("/intake/batch")
 @limiter.limit(f"{int(settings.rate_limit_requests_per_minute / 2)}/minute")
 async def submit_leads_batch(
@@ -326,6 +330,8 @@ async def submit_leads_batch(
                 {"error_type": type(e).__name__}
             )
         )
+
+
 
 
 @router.post("/intake/check-similar")
