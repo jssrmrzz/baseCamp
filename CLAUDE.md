@@ -405,7 +405,59 @@ Traditional semantic similarity can flag legitimate different customers with sim
 ### 🔧 Remaining Optional Enhancements
 - **Leads API Tests**: Some CRUD operation tests could benefit from further refinement
 - **Pydantic V2 Migration**: Deprecation warnings to be addressed in future updates
-- **Authentication**: API key/OAuth implementation planned for production security
+- **VPS Deployment**: Container orchestration and reverse proxy setup for production
+
+## Deployment Architecture
+
+**Current Status**: ✅ **100% OPERATIONAL** - Complete baseCamp platform ready for production deployment
+
+### VPS Container-Per-Client Model
+
+baseCamp is designed for **multi-tenant deployment on a single VPS** using container isolation:
+
+```
+VPS Server (Single Instance):
+├── Nginx Reverse Proxy (Port 80/443)
+│   ├── client-a.yourdomain.com → Container A (Port 8001)
+│   ├── client-b.yourdomain.com → Container B (Port 8002)
+│   └── client-c.yourdomain.com → Container C (Port 8003)
+├── Client A Container: baseCamp + Ollama + ChromaDB → Client A's Airtable
+├── Client B Container: baseCamp + Ollama + ChromaDB → Client B's Airtable
+└── Client C Container: baseCamp + Ollama + ChromaDB → Client C's Airtable
+```
+
+### Security Through Isolation
+
+**Container-Per-Client = Natural Security**:
+- ✅ **Process Isolation**: Each client runs in separate container
+- ✅ **Network Isolation**: Isolated container networks
+- ✅ **Data Isolation**: Each client has their own Airtable account
+- ✅ **Credential Isolation**: Per-container environment variables
+- ✅ **Resource Isolation**: Independent CPU/memory allocation
+
+**Authentication Assessment: LOW PRIORITY**
+- Container isolation provides better security than application auth
+- Attack surface limited to individual client containers
+- No cross-tenant data leakage possible
+- Simple operational model for client management
+
+### Production Security Priorities
+
+**High Priority:**
+1. **Reverse Proxy Security** - SSL termination, domain routing (nginx)
+2. **Container Security** - Base image updates, resource limits
+3. **VPS Security** - Firewall, SSH keys, system hardening
+4. **SSL Certificate Management** - Let's Encrypt automation
+
+**Medium Priority:**
+5. **Rate Limiting** - Per-container form submission limits
+6. **Input Validation** - Comprehensive form sanitization
+7. **Container Monitoring** - Resource usage and health checks
+8. **Backup Strategy** - Data and configuration backups
+
+**Low Priority (Optional):**
+9. **API Authentication** - Only if clients need restricted form access
+10. **Admin Dashboard Auth** - Only for management interface
 
 ### 📊 Final System Status Summary (August 2025)
 

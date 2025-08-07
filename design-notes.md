@@ -29,41 +29,68 @@
 
 ## System Architecture Overview
 
-### High-Level Architecture
+### VPS Multi-Tenant Architecture (Production)
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Client Apps   │    │   Web Forms     │    │   API Clients   │
-│   (Mobile/Web)  │    │   (Embedded)    │    │   (Zapier/etc)  │
-└─────────┬───────┘    └─────────┬───────┘    └─────────┬───────┘
-          │                      │                      │
-          └──────────────────────┼──────────────────────┘
-                                 │
-                    ┌─────────────┴─────────────┐
-                    │      FastAPI Server      │
-                    │    (Lead Processing)     │
-                    └─────────────┬─────────────┘
-                                 │
-                    ┌─────────────┴─────────────┐
-                    │    Service Layer         │
-                    │  ┌─────┐ ┌─────┐ ┌─────┐ │
-                    │  │ LLM │ │Vec. │ │CRM  │ │
-                    │  │Svc  │ │DB   │ │Sync │ │
-                    │  └─────┘ └─────┘ └─────┘ │
-                    └─────────────┬─────────────┘
-                                 │
-    ┌─────────────┐    ┌─────────┴───────┐    ┌─────────────┐
-    │   Ollama    │    │   ChromaDB      │    │  Airtable   │
-    │  (Local)    │    │  (Vectors)      │    │    API      │
-    └─────────────┘    └─────────────────┘    └─────────────┘
+                    Internet
+                        │
+                ┌───────┴────────┐
+                │ Nginx Reverse  │
+                │    Proxy       │  
+                │  (SSL Term.)   │
+                └───────┬────────┘
+                        │
+        ┌───────────────┼───────────────┐
+        │               │               │
+   ┌────┴────┐    ┌─────┴─────┐   ┌─────┴─────┐
+   │Client A │    │ Client B  │   │ Client C  │
+   │Container│    │ Container │   │ Container │
+   │Port 8001│    │Port 8002  │   │Port 8003  │
+   └────┬────┘    └─────┬─────┘   └─────┬─────┘
+        │               │               │
+   ┌────┴────┐    ┌─────┴─────┐   ┌─────┴─────┐
+   │ Ollama  │    │  Ollama   │   │  Ollama   │
+   │ChromaDB │    │ ChromaDB  │   │ ChromaDB  │
+   └────┬────┘    └─────┬─────┘   └─────┬─────┘
+        │               │               │
+   ┌────┴────┐    ┌─────┴─────┐   ┌─────┴─────┐
+   │Client A │    │ Client B  │   │ Client C  │
+   │Airtable │    │ Airtable  │   │ Airtable  │
+   └─────────┘    └───────────┘   └───────────┘
 ```
 
-### Service-Oriented Design
-The system follows a service-oriented architecture with clear boundaries:
+### Container-Per-Client Isolation Benefits
+
+**Security Through Process Isolation**:
+- Each client runs in completely separate containers
+- No shared memory, processes, or file systems
+- Network isolation prevents cross-client communication
+- Independent resource limits and scaling
+
+**Operational Simplicity**:
+- Simple client onboarding (new container deployment)
+- Independent updates and maintenance per client
+- Clear resource usage tracking and billing
+- Easy client offboarding (container removal)
+
+**Data Isolation Guarantees**:
+- Each client connects to their own Airtable account
+- Separate ChromaDB instances with no cross-contamination
+- Independent environment variables and secrets
+- Isolated log files and monitoring
+
+### Service-Oriented Design (Per Container)
+Each client container follows the same service-oriented architecture:
 
 1. **API Layer**: FastAPI handles HTTP requests and responses
 2. **Service Layer**: Business logic encapsulated in service classes
 3. **Data Layer**: ChromaDB for vectors, Airtable for CRM data
 4. **External Services**: Ollama for LLM inference
+
+**Authentication Assessment: UNNECESSARY**
+- Container isolation provides stronger security than application auth
+- No cross-tenant data access possible
+- Attack surface limited to individual client containers
+- Simple operational model without authentication complexity
 
 ## Data Flow & Processing Pipeline
 

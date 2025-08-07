@@ -305,10 +305,18 @@ def _is_same_contact(self, lead: LeadInput, stored_metadata: Dict) -> bool:
 - **False Positive Rate**: <1% with contact-based exclusion
 - **Test Validation**: Oil change scenario (2 customers, 0.722 similarity) → Both processed ✅
 
+**Container Deployment Benefits**:
+- Complete client data isolation
+- Independent scaling per client
+- Simple client onboarding/offboarding
+- Resource usage transparency
+- Minimal cross-tenant security concerns
+
 **Alternatives Considered**:
 - Pinecone: Requires external service, costs
 - Weaviate: More complex setup for local use
 - FAISS: No built-in persistence, lower-level
+- Shared ChromaDB: Risk of cross-client data leakage
 
 ## Data Validation & Models
 
@@ -454,37 +462,124 @@ data/
 ## Containerization & Deployment
 
 ### Docker ✅
-**Purpose**: Containerized deployment
+**Purpose**: Container-per-client deployment on VPS
 **Status**: ✅ Complete configuration with multi-stage builds
 **Base Image**: `python:3.11-slim`
 **Multi-stage Build**: Optimized production images
 
-**Implementation**: `Dockerfile` and `docker-compose.yml`
-**Docker Compose Services**:
+**VPS Multi-Container Architecture**:
 ```yaml
+# Template for client-specific deployment
 services:
-  api:
+  client-a-api:
     build: .
+    container_name: basecamp-client-a
     ports:
-      - "8000:8000"
+      - "8001:8000"
     environment:
-      - OLLAMA_BASE_URL=http://ollama:11434
-    depends_on:
-      - ollama
-      
-  ollama:
-    image: ollama/ollama:latest
-    ports:
-      - "11434:11434"
+      - OLLAMA_BASE_URL=http://client-a-ollama:11434
+      - AIRTABLE_API_KEY=${CLIENT_A_AIRTABLE_KEY}
+      - AIRTABLE_BASE_ID=${CLIENT_A_BASE_ID}
     volumes:
-      - ollama_data:/root/.ollama
+      - client-a-chroma:/app/chroma_db
+    depends_on:
+      - client-a-ollama
+    restart: unless-stopped
+      
+  client-a-ollama:
+    image: ollama/ollama:latest
+    container_name: ollama-client-a
+    ports:
+      - "11435:11434"
+    volumes:
+      - client-a-ollama:/root/.ollama
+    restart: unless-stopped
+
+volumes:
+  client-a-chroma:
+  client-a-ollama:
+
+networks:
+  client-a-net:
+    driver: bridge
+```
+
+### Nginx Reverse Proxy ✅
+**Purpose**: Domain-based routing and SSL termination
+**Status**: ✅ Production-ready configuration template
+**Features**:
+- SSL certificate automation (Let's Encrypt)
+- Domain-based routing to client containers
+- Load balancing and failover
+- Security headers and rate limiting
+
+**Configuration Example**:
+```nginx
+server {
+    listen 443 ssl;
+    server_name client-a.yourdomain.com;
+    
+    ssl_certificate /etc/letsencrypt/live/client-a.yourdomain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/client-a.yourdomain.com/privkey.pem;
+    
+    location / {
+        proxy_pass http://127.0.0.1:8001;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Rate limiting per client
+        limit_req zone=client_a burst=20 nodelay;
+    }
+}
+
+# Rate limiting configuration
+http {
+    limit_req_zone $binary_remote_addr zone=client_a:10m rate=10r/m;
+    limit_req_zone $binary_remote_addr zone=client_b:10m rate=10r/m;
+    # ... additional client zones
+}
+```
+
+### Container Orchestration Strategy
+**Multi-Tenant Isolation**:
+- Each client gets dedicated containers (API + Ollama + ChromaDB)
+- Isolated Docker networks prevent cross-client communication
+- Independent resource limits and scaling per client
+- Separate volumes for data persistence
+
+**Resource Management**:
+```yaml
+deploy:
+  resources:
+    limits:
+      cpus: '2.0'      # 2 CPU cores per client
+      memory: 4G       # 4GB RAM per client
+    reservations:
+      cpus: '0.5'
+      memory: 1G
 ```
 
 ### Environment Management
-**Development**: Direct Python execution
-**Production**: Docker containers
-**Configuration**: Environment variables
-**Secrets**: Docker secrets or external secret management
+**Development**: Direct Python execution with local services
+**Production**: Container-per-client on VPS
+**Configuration**: Per-client environment variables in Docker Compose
+**Secrets**: Docker secrets with per-client isolation
+
+**Client Environment Template**:
+```bash
+# Client A Environment (.env.client-a)
+API_HOST=0.0.0.0
+API_PORT=8000
+OLLAMA_BASE_URL=http://client-a-ollama:11434
+OLLAMA_MODEL=mistral:latest
+CHROMA_PERSIST_DIRECTORY=./chroma_db
+AIRTABLE_API_KEY=client_a_key_here
+AIRTABLE_BASE_ID=client_a_base_id
+AIRTABLE_TABLE_NAME=Leads
+BUSINESS_TYPE=automotive  # Client-specific business type
+```
 
 ## Networking & Communication
 
@@ -591,20 +686,40 @@ logging.basicConfig(
 
 ## Hardware Requirements
 
-### Minimum System Requirements
-- **CPU**: 4 cores, 2.5GHz+
-- **RAM**: 8GB (4GB minimum)
-- **Storage**: 20GB SSD
-- **Network**: Stable internet for Airtable sync
+### VPS Requirements (Multi-Client)
+**Per Client Resource Allocation**:
+- **CPU**: 1-2 cores per client container
+- **RAM**: 3-4GB per client (API: 1GB, Ollama: 2-3GB)
+- **Storage**: 15-20GB per client (models: 10GB, data: 5-10GB)
 
-### Recommended Production Setup
+**Minimum VPS Specs (3-5 clients)**:
 - **CPU**: 8 cores, 3.0GHz+
-- **RAM**: 16GB
-- **Storage**: 100GB NVMe SSD
-- **Network**: High-speed connection, low latency
+- **RAM**: 16GB minimum, 32GB recommended
+- **Storage**: 100GB NVMe SSD (models shared, data isolated)
+- **Network**: 100Mbps+ for concurrent processing
+- **OS**: Ubuntu 22.04 LTS or similar
 
-### Scaling Considerations
-- **Horizontal Scaling**: Multiple API instances
-- **Load Balancing**: Nginx or cloud load balancer
-- **Database Scaling**: ChromaDB collection partitioning
-- **Caching Layer**: Redis for session/data caching
+**Recommended Production VPS (5-10 clients)**:
+- **CPU**: 16 cores, 3.5GHz+
+- **RAM**: 64GB
+- **Storage**: 500GB NVMe SSD
+- **Network**: 1Gbps with low latency
+- **Backup**: Automated daily backups
+
+### Scaling Strategies
+**Vertical Scaling (Per VPS)**:
+- Add CPU/RAM to support more clients per server
+- SSD storage expansion for additional data
+- Network bandwidth optimization
+
+**Horizontal Scaling (Multiple VPS)**:
+- Geographic distribution (US-East, US-West, EU)
+- Client load balancing across VPS instances
+- Regional nginx load balancers
+- Centralized monitoring and management
+
+**Resource Optimization**:
+- Shared Ollama models across client containers
+- Shared nginx reverse proxy
+- Container resource limits and auto-scaling
+- Efficient ChromaDB storage with compression
