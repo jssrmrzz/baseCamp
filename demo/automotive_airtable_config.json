@@ -1,0 +1,70 @@
+{
+  "table_name": "Demo_Leads",
+  "fields": [
+    {
+      "name": "Name",
+      "type": "singleLineText"
+    },
+    {
+      "name": "Email",
+      "type": "email"
+    },
+    {
+      "name": "Phone",
+      "type": "phoneNumber"
+    },
+    {
+      "name": "Message",
+      "type": "multilineText"
+    },
+    {
+      "name": "Source",
+      "type": "singleSelect",
+      "options": [
+        "Demo Form",
+        "Website Form",
+        "Email",
+        "Phone"
+      ]
+    },
+    {
+      "name": "Intent",
+      "type": "singleSelect",
+      "options": [
+        "Service Request",
+        "Emergency Repair",
+        "Quote Request",
+        "Appointment",
+        "General Inquiry"
+      ]
+    },
+    {
+      "name": "Urgency Score",
+      "type": "number",
+      "precision": 1
+    },
+    {
+      "name": "Quality Score",
+      "type": "number",
+      "precision": 1
+    },
+    {
+      "name": "Status",
+      "type": "singleSelect",
+      "options": [
+        "New",
+        "Contacted",
+        "Qualified",
+        "Closed"
+      ]
+    },
+    {
+      "name": "Created",
+      "type": "dateTime"
+    },
+    {
+      "name": "Notes",
+      "type": "multilineText"
+    }
+  ]
+}

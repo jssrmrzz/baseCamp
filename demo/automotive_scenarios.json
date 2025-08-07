@@ -1,0 +1,59 @@
+{
+  "business_type": "automotive",
+  "display_name": "Automotive Repair Shop",
+  "description": "Car repair and maintenance services",
+  "scenarios": [
+    {
+      "name": "Brake Repair Emergency",
+      "message": "My 2019 Honda Civic makes a grinding noise when I brake. It started this morning and I'm worried it's not safe to drive. Can someone look at it today?",
+      "contact": {
+        "first_name": "Sarah",
+        "last_name": "Johnson",
+        "email": "sarah.j@email.com",
+        "phone": "555-0123"
+      },
+      "expected_intent": "appointment_request",
+      "expected_urgency": 0.9
+    },
+    {
+      "name": "Regular Oil Change",
+      "message": "Hi, I need to schedule an oil change for my 2020 Toyota Camry. I'm flexible on timing, just sometime next week would be great.",
+      "contact": {
+        "first_name": "Mike",
+        "last_name": "Chen",
+        "email": "mike.chen@email.com",
+        "phone": "555-0456"
+      },
+      "expected_intent": "service_request",
+      "expected_urgency": 0.3
+    },
+    {
+      "name": "Check Engine Light",
+      "message": "Check engine light came on in my 2018 Ford F-150. Truck seems to run fine but want to get it diagnosed. What would this cost?",
+      "contact": {
+        "first_name": "David",
+        "last_name": "Rodriguez",
+        "email": "d.rodriguez@email.com",
+        "phone": "555-0789"
+      },
+      "expected_intent": "quote_request",
+      "expected_urgency": 0.6
+    }
+  ],
+  "demo_instructions": {
+    "overview": "Demo scenarios for Automotive Repair Shop",
+    "how_to_test": [
+      "1. Use the provided sample messages in your demo forms",
+      "2. Show how the AI analyzes intent and urgency",
+      "3. Demonstrate similarity detection with different customers",
+      "4. Show the Airtable integration in real-time"
+    ],
+    "key_features_to_highlight": [
+      "AI-powered intent classification",
+      "Automatic urgency scoring",
+      "Smart duplicate detection",
+      "Real-time CRM integration",
+      "Business-specific prompt optimization"
+    ]
+  }
+}
