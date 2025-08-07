@@ -237,13 +237,20 @@ async def submit_lead(
             )
             
     except ValueError as e:
-        logger.warning(f"Invalid lead data: {str(e)}")
+        logger.warning(f"Invalid lead data: {str(e)}", extra={
+            "lead_message_preview": lead_input.message[:50] if lead_input else "N/A",
+            "validation_error": str(e)
+        })
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
             content=IntakeResponse.error(f"Invalid lead data: {str(e)}")
         )
     except Exception as e:
-        logger.error(f"Lead intake failed: {str(e)}")
+        logger.error(f"Lead intake failed: {str(e)}", extra={
+            "lead_message_preview": lead_input.message[:50] if lead_input else "N/A",
+            "error_type": type(e).__name__,
+            "client_ip": lead_input.ip_address if lead_input else None
+        })
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content=IntakeResponse.error(
