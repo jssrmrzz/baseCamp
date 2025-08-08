@@ -105,7 +105,7 @@ async def list_leads(
     offset: int = Query(0, ge=0, description="Number of leads to skip"),
     
     # Filtering
-    status: Optional[LeadStatus] = Query(None, description="Filter by lead status"),
+    lead_status: Optional[LeadStatus] = Query(None, alias="status", description="Filter by lead status"),
     intent: Optional[IntentCategory] = Query(None, description="Filter by intent category"),
     urgency: Optional[UrgencyLevel] = Query(None, description="Filter by urgency level"),
     min_quality_score: Optional[int] = Query(None, ge=0, le=100, description="Minimum quality score"),
@@ -157,7 +157,7 @@ async def list_leads(
         lead_query = LeadQuery(
             limit=limit,
             offset=offset,
-            status=status,
+            status=lead_status,
             intent=intent,
             urgency=urgency,
             min_quality_score=min_quality_score,
@@ -169,7 +169,7 @@ async def list_leads(
             sort_order=sort_order
         )
         
-        logger.info(f"Listing leads with query: {lead_query.dict()}")
+        logger.info(f"Listing leads with query: {lead_query.model_dump()}")
         
         # Get leads from storage
         leads, total_count = await LeadStorage.list_leads(lead_query)
@@ -182,7 +182,7 @@ async def list_leads(
         has_prev = offset > 0
         
         response_data = {
-            "leads": [summary.dict() for summary in lead_summaries],
+            "leads": [summary.model_dump(mode='json') for summary in lead_summaries],
             "pagination": {
                 "total": total_count,
                 "limit": limit,
@@ -192,7 +192,7 @@ async def list_leads(
                 "page": (offset // limit) + 1,
                 "total_pages": (total_count + limit - 1) // limit
             },
-            "filters": lead_query.dict(exclude_none=True)
+            "filters": lead_query.model_dump(exclude_none=True)
         }
         
         return JSONResponse(
@@ -240,7 +240,7 @@ async def get_lead(
         
         # Return complete lead data
         response_data = {
-            "lead": lead.dict()
+            "lead": lead.model_dump(mode='json')
         }
         
         return JSONResponse(
@@ -395,7 +395,7 @@ async def update_lead(
             )
         
         response_data = {
-            "lead": updated_lead.dict(),
+            "lead": updated_lead.model_dump(mode='json'),
             "updated_fields": list(updates.keys())
         }
         
@@ -606,7 +606,7 @@ async def export_leads(
             "export_status": "not_implemented",
             "message": "Export functionality not yet implemented",
             "requested_format": format,
-            "query": export_query.dict(exclude_none=True)
+            "query": export_query.model_dump(exclude_none=True)
         }
         
         return JSONResponse(
