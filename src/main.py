@@ -122,8 +122,8 @@ async def health_check(request: Request) -> Dict[str, Any]:
     }
     
     try:
-        from datetime import datetime
-        health_status["timestamp"] = datetime.utcnow().isoformat() + "Z"
+        from datetime import datetime, timezone
+        health_status["timestamp"] = datetime.now(timezone.utc).isoformat()
         
         # TODO: Add actual service health checks when services are implemented
         # - Check Ollama connection

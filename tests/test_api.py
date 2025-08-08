@@ -301,7 +301,7 @@ class TestLeadsAPI:
         }
         
         # Create updated lead
-        updated_lead = sample_enriched_lead.copy()
+        updated_lead = sample_enriched_lead.model_copy()
         updated_lead.status = LeadStatus.SYNCED
         updated_lead.custom_fields.update(update_data["custom_fields"])
         

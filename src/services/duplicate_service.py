@@ -161,7 +161,7 @@ class SmartDuplicateAnalyzer(DuplicateServiceInterface):
             contact_leads = []
             cutoff_time = None
             if time_window_hours:
-                cutoff_time = datetime.utcnow() - timedelta(hours=time_window_hours)
+                cutoff_time = datetime.now(timezone.utc) - timedelta(hours=time_window_hours)
             
             for result in similar_results:
                 # Check if it's truly the same contact

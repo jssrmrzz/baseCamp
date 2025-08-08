@@ -1,7 +1,7 @@
 """Configuration settings for baseCamp application."""
 
 from typing import List, Literal, Optional
-from pydantic import Field, validator, model_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings
 import os
 
@@ -70,7 +70,8 @@ class Settings(BaseSettings):
         env_file_encoding = "utf-8"
         case_sensitive = False
 
-    @validator("cors_origins", pre=True)
+    @field_validator("cors_origins", mode="before")
+    @classmethod
     def parse_cors_origins(cls, v):
         """Parse CORS origins from string or list."""
         if isinstance(v, str):
@@ -83,21 +84,24 @@ class Settings(BaseSettings):
                 return [origin.strip() for origin in v.split(",") if origin.strip()]
         return v
 
-    @validator("allowed_hosts", pre=True)
+    @field_validator("allowed_hosts", mode="before")
+    @classmethod
     def parse_allowed_hosts(cls, v):
         """Parse allowed hosts from string or list."""
         if isinstance(v, str):
             return [host.strip() for host in v.split(",") if host.strip()]
         return v
 
-    @validator("chroma_persist_directory")
+    @field_validator("chroma_persist_directory")
+    @classmethod
     def validate_chroma_directory(cls, v):
         """Ensure ChromaDB directory exists."""
         if not os.path.exists(v):
             os.makedirs(v, exist_ok=True)
         return v
 
-    @validator("lead_similarity_threshold")
+    @field_validator("lead_similarity_threshold")
+    @classmethod
     def validate_similarity_threshold(cls, v):
         """Ensure similarity threshold is between 0 and 1."""
         if not 0.0 <= v <= 1.0:

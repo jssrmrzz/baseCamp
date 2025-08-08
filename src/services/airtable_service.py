@@ -259,7 +259,7 @@ class AirtableService(CRMServiceInterface):
         if not leads:
             raise ValueError("Cannot sync empty leads list")
         
-        batch_id = f"batch_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{len(leads)}"
+        batch_id = f"batch_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}_{len(leads)}"
         
         # Create sync records for each lead
         sync_operations = []
