@@ -270,9 +270,11 @@ class TestLeadsAPI:
         """Test lead retrieval with invalid UUID."""
         response = client.get("/api/v1/leads/invalid-uuid")
         
-        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
         data = response.json()
-        assert "invalid" in data["message"].lower()
+        assert "detail" in data
+        assert len(data["detail"]) > 0
+        assert "uuid" in data["detail"][0]["msg"].lower()
     
     def test_get_similar_leads(self, client: TestClient, sample_enriched_lead, mock_services):
         """Test getting similar leads for a specific lead."""
