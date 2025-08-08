@@ -4,7 +4,7 @@ import asyncio
 import json
 import logging
 from abc import ABC, abstractmethod
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Optional, Tuple
 
 import httpx
@@ -289,9 +289,9 @@ Focus on consulting needs, project scope, and decision-making authority."""
             )
             
             # Make request to Ollama
-            start_time = datetime.utcnow()
+            start_time = datetime.now(timezone.utc)
             response = await self._make_ollama_request(system_prompt, user_prompt)
-            processing_time = (datetime.utcnow() - start_time).total_seconds()
+            processing_time = (datetime.now(timezone.utc) - start_time).total_seconds()
             
             # Parse JSON response
             try:

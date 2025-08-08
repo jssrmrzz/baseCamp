@@ -234,7 +234,7 @@ class TestEnrichedLead:
     
     def test_enriched_lead_creation(self, sample_lead_input):
         """Test enriched lead creation from lead input."""
-        enriched = EnrichedLead(**sample_lead_input.dict())
+        enriched = EnrichedLead(**sample_lead_input.model_dump())
         
         assert enriched.message == sample_lead_input.message
         assert enriched.contact == sample_lead_input.contact
@@ -457,7 +457,7 @@ class TestLeadSummary:
         # Long message
         long_message = "x" * 250
         lead_input = LeadInput(message=long_message)
-        enriched = EnrichedLead(**lead_input.dict())
+        enriched = EnrichedLead(**lead_input.model_dump())
         
         summary = LeadSummary.from_enriched_lead(enriched)
         assert len(summary.message) <= 203  # 200 + "..."

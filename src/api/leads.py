@@ -38,8 +38,8 @@ class LeadsResponse:
         }
         
         # Add timestamp
-        from datetime import datetime
-        response["timestamp"] = datetime.utcnow().isoformat() + "Z"
+        from datetime import datetime, timezone
+        response["timestamp"] = datetime.now(timezone.utc).isoformat()
         
         return response
     
@@ -56,8 +56,8 @@ class LeadsResponse:
             response["details"] = details
         
         # Add timestamp
-        from datetime import datetime
-        response["timestamp"] = datetime.utcnow().isoformat() + "Z"
+        from datetime import datetime, timezone
+        response["timestamp"] = datetime.now(timezone.utc).isoformat()
         
         return response
 
@@ -120,7 +120,7 @@ async def list_leads(
     
     # Sorting
     sort_by: str = Query("received_at", description="Sort field"),
-    sort_order: str = Query("desc", regex="^(asc|desc)$", description="Sort order")
+    sort_order: str = Query("desc", pattern="^(asc|desc)$", description="Sort order")
 ) -> JSONResponse:
     """
     List leads with filtering, pagination, and search.
@@ -470,7 +470,7 @@ async def delete_lead(
         
         # Add timestamp
         from datetime import datetime
-        response_data["deletion_timestamp"] = datetime.utcnow().isoformat() + "Z"
+        response_data["deletion_timestamp"] = datetime.now(timezone.utc).isoformat()
         
         return JSONResponse(
             status_code=status.HTTP_200_OK,
@@ -559,7 +559,7 @@ async def get_leads_summary_stats(
         
         # Add timestamp
         from datetime import datetime
-        response_data["generated_at"] = datetime.utcnow().isoformat() + "Z"
+        response_data["generated_at"] = datetime.now(timezone.utc).isoformat()
         
         return JSONResponse(
             status_code=status.HTTP_200_OK,
@@ -585,7 +585,7 @@ async def get_leads_summary_stats(
 async def export_leads(
     request: Request,
     export_query: LeadQuery,
-    format: str = Query("csv", regex="^(csv|json)$", description="Export format")
+    format: str = Query("csv", pattern="^(csv|json)$", description="Export format")
 ) -> JSONResponse:
     """
     Export leads data.

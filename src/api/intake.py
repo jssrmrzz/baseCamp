@@ -50,8 +50,8 @@ class IntakeResponse:
             response["similar_leads"] = similar_leads
         
         # Add timestamp
-        from datetime import datetime
-        response["timestamp"] = datetime.utcnow().isoformat() + "Z"
+        from datetime import datetime, timezone
+        response["timestamp"] = datetime.now(timezone.utc).isoformat()
         
         return response
     
@@ -68,8 +68,8 @@ class IntakeResponse:
             response["details"] = details
         
         # Add timestamp
-        from datetime import datetime
-        response["timestamp"] = datetime.utcnow().isoformat() + "Z"
+        from datetime import datetime, timezone
+        response["timestamp"] = datetime.now(timezone.utc).isoformat()
         
         return response
 
@@ -83,7 +83,7 @@ async def process_lead_pipeline(
     """Process lead through the complete enrichment pipeline."""
     
     # Create enriched lead from input
-    enriched_lead = EnrichedLead(**lead_input.dict())
+    enriched_lead = EnrichedLead(**lead_input.model_dump())
     enriched_lead.mark_processing()
     
     try:
@@ -191,7 +191,7 @@ async def submit_lead(
         logger.info(f"New lead intake: {lead_input.message[:100]}...")
         
         # Create enriched lead for immediate response
-        enriched_lead = EnrichedLead(**lead_input.dict())
+        enriched_lead = EnrichedLead(**lead_input.model_dump())
         
         if settings.enable_background_tasks:
             # Process in background for faster response
@@ -304,7 +304,7 @@ async def submit_leads_batch(
         # Create lead IDs for response
         lead_ids = []
         for lead_input in leads:
-            enriched_lead = EnrichedLead(**lead_input.dict())
+            enriched_lead = EnrichedLead(**lead_input.model_dump())
             lead_ids.append(enriched_lead.id)
         
         # Process all leads in background
@@ -486,7 +486,7 @@ async def intake_health_check(
         
         # Add timestamp
         from datetime import datetime
-        health_status["timestamp"] = datetime.utcnow().isoformat() + "Z"
+        health_status["timestamp"] = datetime.now(timezone.utc).isoformat()
         
         return JSONResponse(
             status_code=status_code,

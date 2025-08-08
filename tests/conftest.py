@@ -142,7 +142,7 @@ def sample_enriched_lead(
     sample_vector_data: VectorData
 ) -> EnrichedLead:
     """Sample enriched lead for testing."""
-    lead = EnrichedLead(**sample_lead_input.dict())
+    lead = EnrichedLead(**sample_lead_input.model_dump())
     lead.mark_enriched(sample_ai_analysis)
     lead.vector_data = sample_vector_data
     return lead
